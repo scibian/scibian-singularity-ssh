@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# Copyright (C) 2017 Scibian Project <legal@scibian.org>
+#
+# This file is part of scibian-libpam-mkhomedir.
+#
+# scibian-libpam-mkhomedir is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# scibian-libpam-mkhomedir is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with scibian-singularity-ssh.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+set -ueo pipefail
+
+ssh_legacy=${SINGULARITY_SSH_LEGACY:-/usr/bin/ssh.legacy}
+
+# If not into a container then exec legacy ssh
+if [ -z "${SINGULARITY_CONTAINER:-}" ]; then
+  exec "$ssh_legacy" "$@"
+fi
+
+readonly SSH_SINGLE_OPTS="[1246AaCfGgKkMNnqsTtVvXxYy]"
+readonly SSH_MULTI_OPTS="[bcDEeFIiJLlmOopQRSWw]"
+
+SSH_OPTIONS=()
+SSH_USER_HOST=
+
+# While an option is found, stack it
+# Stack [user@]host parameter as well, and the options just after it
+# Stop at the first parameter which is not an option nor the [user@]host parameter
+# Accepting options following [user@]host paramter allows syntax found in SCIENCE:
+#   ssh <machine> -n <command>
+while (( $# > 0 )) ;do
+  case "$1" in
+    --)
+      SSH_OPTIONS+=("$1")
+      shift
+      ;;
+
+    -*)
+      if [[ "$1" =~ -${SSH_SINGLE_OPTS}*$ ]]; then
+        SSH_OPTIONS+=("$1")
+	shift
+      elif [[ "$1" =~ -${SSH_SINGLE_OPTS}*${SSH_MULTI_OPTS}$ ]]; then
+        if (( $# > 1 )); then
+          SSH_OPTIONS+=("$1" "$2")
+          shift 2
+        else
+          SSH_OPTIONS+=("$1")
+          shift
+        fi
+      else
+        # Do not stack invalid options (will be handled by legacy ssh)
+        break
+      fi
+      ;;
+    *)
+      if [ -n "${SSH_USER_HOST:-}" ]; then
+        break
+      fi
+      SSH_USER_HOST="$1"
+      SSH_OPTIONS+=("$1")
+      shift
+      if [ "${1:-}" = "--" ]; then
+        SSH_OPTIONS+=("$1")
+        shift
+      fi
+      ;;
+  esac
+done
+
+if [ -z "${SSH_USER_HOST:-}" ]; then
+  # No host -> call legacy ssh
+  exec "$ssh_legacy" "${SSH_OPTIONS[@]}" "$@"
+else
+  # No command -> singularity shell
+  # Add option -t for interactive session
+  if (( $# == 0 )); then
+    exec "$ssh_legacy" -t "${SSH_OPTIONS[@]}" singularity shell "$SINGULARITY_CONTAINER"
+  fi
+  # Command
+  exec "$ssh_legacy" "${SSH_OPTIONS[@]}" singularity exec "$SINGULARITY_CONTAINER" "$@"
+fi
