@@ -1,0 +1,5 @@
+scibian-singularity-ssh (0.1) calibre9; urgency=medium
+
+  * Initial Release.
+
+ -- Gilles Filippini <gilles.filippini@edf.fr>  Fri, 04 Dec 2020 18:29:46 +0100
