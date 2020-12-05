@@ -50,13 +50,8 @@ while (( $# > 0 )) ;do
         SSH_OPTIONS+=("$1")
 	shift
       elif [[ "$1" =~ -${SSH_SINGLE_OPTS}*${SSH_MULTI_OPTS}$ ]]; then
-        if (( $# > 1 )); then
-          SSH_OPTIONS+=("$1" "$2")
-          shift 2
-        else
-          SSH_OPTIONS+=("$1")
-          shift
-        fi
+        SSH_OPTIONS+=("$1" "${2:-}")
+        shift 2
       else
         # Do not stack invalid options (will be handled by legacy ssh)
         break
@@ -79,7 +74,11 @@ done
 
 if [ -z "${SSH_USER_HOST:-}" ]; then
   # No host -> call legacy ssh
-  exec "$ssh_legacy" "${SSH_OPTIONS[@]}" "$@"
+  if (( ${#SSH_OPTIONS[@]} > 0 )); then
+    exec "$ssh_legacy" "${SSH_OPTIONS[@]}" "$@"
+  else
+    exec "$ssh_legacy" "$@"
+  fi
 else
   # No command -> singularity shell
   # Add option -t for interactive session
