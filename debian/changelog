@@ -1,3 +1,9 @@
+scibian-singularity-ssh (0.3) scibian10; urgency=medium
+
+  * Build for Scibian 10
+
+ -- Gilles Filippini <gilles.filippini@edf.fr>  Mon, 07 Dec 2020 13:55:47 +0100
+
 scibian-singularity-ssh (0.2) scibian9; urgency=medium
 
   * Build for Scibian 9
