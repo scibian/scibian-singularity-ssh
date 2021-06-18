@@ -1,3 +1,10 @@
+scibian-singularity-ssh (0.4sci8u1) scibian8; urgency=medium
+
+  * Use 'singularity exec <img> bash -c "<cmd>"' to cope with commands being
+    shellscript snippets
+
+ -- Gilles Filippini <gilles.filippini@edf.fr>  Fri, 18 Jun 2021 15:10:48 +0200
+
 scibian-singularity-ssh (0.1) scibian8; urgency=medium
 
   * Initial Release.
