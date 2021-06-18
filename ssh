@@ -86,5 +86,5 @@ else
     exec "$ssh_legacy" -t "${SSH_OPTIONS[@]}" singularity shell "$SINGULARITY_CONTAINER"
   fi
   # Command
-  exec "$ssh_legacy" "${SSH_OPTIONS[@]}" singularity exec "$SINGULARITY_CONTAINER" "$@"
+  exec "$ssh_legacy" "${SSH_OPTIONS[@]}" singularity exec "$SINGULARITY_CONTAINER" "bash -c '""$@""'"
 fi
