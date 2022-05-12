@@ -1,3 +1,11 @@
+scibian-singularity-ssh (0.4sci11u1) scibian11; urgency=medium
+
+  * Bump debian-branch in gbp.conf
+  * Bump d/compat to 13
+  * Build for Scibian 11
+
+ -- Rémi Palancher <remi-externe.palancher@edf.fr>  Thu, 12 May 2022 14:24:25 +0200
+
 scibian-singularity-ssh (0.4) scibian10; urgency=medium
 
   * Use 'singularity exec <img> bash -c "<cmd>"' to cope with commands being
